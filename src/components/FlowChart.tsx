@@ -1,6 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import ReactFlow, {
-  Node,
+  type Node,
+  type Edge,
+  type OnNodesChange,
+  type OnNodesDelete,
+  type OnEdgesChange,
+  type OnConnect,
+  type NodeChange,
+  type ReactFlowInstance,
+  type NodeDimensionChange,
   Controls,
   Background,
   applyNodeChanges,
@@ -8,14 +16,8 @@ import ReactFlow, {
   MiniMap,
   useReactFlow,
   Panel,
-  Edge,
-  OnNodesChange,
-  OnNodesDelete,
-  OnEdgesChange,
-  OnConnect,
-  NodeChange,
-  ReactFlowInstance,
 } from "reactflow";
+
 import "reactflow/dist/style.css";
 import EditableNode from "./EditableNode";
 import DnDMenu from "./DnDMenu";
@@ -60,7 +62,7 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
     setNodes((nds) =>
       nds.map((nd) => {
         if (nd.id === nodeId) {
-          return { ...nd, data: { ...nd.data, label: text } };
+          return { ...nd, data: { ...nd.data, label: text } as Node };
         }
         return nd;
       }),
@@ -85,7 +87,7 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
           return {
             ...nd,
             data: {
-              ...nd.data,
+              ...(nd.data as { label: string }),
               onUpdateNodeText: onUpdateNodeText,
             },
           };
@@ -127,7 +129,9 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
       // fix typescript error for line 138 and 146
 
       const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
-      const type = event.dataTransfer.getData("application/reactflow");
+      const type = event.dataTransfer.getData(
+        "application/reactflow",
+      ) as string;
 
       // check if the dropped element is valid
       if (typeof type === "undefined" || !type) {
@@ -188,11 +192,17 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
   }, [reactFlowInstance]);
 
   const onRestore = useCallback(() => {
-    const restoreFlow = async () => {
+    const restoreFlow = () => {
       if (!localStorage.getItem(flowKey)) return;
-      const flow = JSON.parse(localStorage.getItem(flowKey) || "");
+      const flow = JSON.parse(localStorage.getItem(flowKey) ?? "") as
+        | {
+            nodes: Node[];
+            edges: Edge[];
+            viewport: { x: number; y: number; zoom: number };
+          }
+        | "";
 
-      if (flow) {
+      if (flow !== "") {
         const { x = 0, y = 0, zoom = 1 } = flow.viewport;
         setNodes(flow.nodes || []);
         setEdges(flow.edges || []);
@@ -207,9 +217,9 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
     // if dimensions are changed, don't update and wait for onResizeStop
 
     setUpdateState(true);
+    if (!changes[0]) return;
 
-    console.log("onNodesChange\n", changes);
-    console.log(changes[0].resizing);
+    console.log((changes[0] as NodeDimensionChange).resizing);
 
     setNodes((nds) => applyNodeChanges(changes, nds));
   }, []);
