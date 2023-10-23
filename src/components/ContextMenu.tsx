@@ -1,5 +1,5 @@
-import { useCallback, CSSProperties } from 'react';
-import { useReactFlow } from 'reactflow';
+import { useCallback, type CSSProperties } from "react";
+import { useReactFlow } from "reactflow";
 
 interface ContextMenuProps {
   id: string;
@@ -12,9 +12,9 @@ interface ContextMenuProps {
 }
 
 interface Edge {
-    source: string;
-    target: string;
-  }
+  source: string;
+  target: string;
+}
 
 export default function ContextMenu({
   id,
@@ -25,7 +25,7 @@ export default function ContextMenu({
   ...props
 }: ContextMenuProps) {
   const { getNode, setNodes, addNodes, setEdges } = useReactFlow<Node, Edge>();
-  
+
   const duplicateNode = useCallback(() => {
     const node = getNode(id);
     if (!node) return;
@@ -43,8 +43,12 @@ export default function ContextMenu({
   }, [id, setNodes, setEdges]);
 
   return (
-    <div style={{ top, left, right, bottom }} className="bg-white border shadow-lg absolute z-10" {...props}>
-      <p style={{ margin: '0.5em' }}>
+    <div
+      style={{ top, left, right, bottom }}
+      className="absolute z-10 border bg-white shadow-lg"
+      {...props}
+    >
+      <p style={{ margin: "0.5em" }}>
         <small>node: {id}</small>
       </p>
       <button onClick={duplicateNode}>duplicate</button>

@@ -1,11 +1,16 @@
-import { Panel, useReactFlow, getRectOfNodes, getTransformForBounds } from 'reactflow';
-import { toPng } from 'html-to-image';
+import {
+  Panel,
+  useReactFlow,
+  getRectOfNodes,
+  getTransformForBounds,
+} from "reactflow";
+import { toPng } from "html-to-image";
 
 function downloadImage(dataUrl: string) {
-  const a = document.createElement('a');
+  const a = document.createElement("a");
 
-  a.setAttribute('download', 'reactflow.png');
-  a.setAttribute('href', dataUrl);
+  a.setAttribute("download", "reactflow.png");
+  a.setAttribute("href", dataUrl);
   a.click();
 }
 
@@ -19,10 +24,16 @@ function DownloadButton() {
     // we then overwrite the transform of the `.react-flow__viewport` element
     // with the style option of the html-to-image library
     const nodesBounds = getRectOfNodes(getNodes());
-    const transform = getTransformForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2);
+    const transform = getTransformForBounds(
+      nodesBounds,
+      imageWidth,
+      imageHeight,
+      0.5,
+      2,
+    );
 
-    toPng(document.querySelector('.react-flow__viewport') as HTMLElement, {
-      backgroundColor: '#FAF9F6',
+    toPng(document.querySelector<HTMLElement>(".react-flow__viewport")!, {
+      backgroundColor: "#FAF9F6",
       width: imageWidth,
       height: imageHeight,
       style: {
@@ -30,7 +41,9 @@ function DownloadButton() {
         height: imageHeight.toString(),
         transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
       },
-    }).then(downloadImage);
+    })
+      .then(downloadImage)
+      .catch((err) => console.log(err));
   };
 
   return (

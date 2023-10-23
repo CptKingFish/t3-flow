@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import { useEffect, useState } from "react";
-import { socket } from "../utils/socket";
+import { socket } from "../lib/socket/socket";
 import FlowChartProvider from "../components/FlowChartProvider";
 
 import { api } from "~/@/utils/api";
