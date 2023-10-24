@@ -8,7 +8,7 @@ import FlowChartProvider from "../components/FlowChartProvider";
 import { api } from "~/@/utils/api";
 
 export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  // const hello = api.post.hello.useQuery({ text: "from tRPC" });
 
   const [wsConnected, setWsConnected] = useState(socket.connected);
   // const [updatedChart, setUpdatedChart] = useState({});

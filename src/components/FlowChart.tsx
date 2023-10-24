@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import useUndoable from "use-undoable";
+import TopMenu from "./TopMenu";
 import ReactFlow, {
   type Node,
   Controls,
@@ -10,6 +11,7 @@ import ReactFlow, {
   type OnNodesDelete,
   type OnEdgesChange,
   type ReactFlowInstance,
+  useOnSelectionChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import EditableNode from "./EditableNode";
@@ -96,12 +98,15 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
     setUpdateState,
   );
 
+  
+
   return (
     <>
       <div
         className="h-screen w-screen bg-white text-black"
         ref={reactFlowWrapper}
       >
+        
         <ReactFlow
           ref={flowRef}
           nodes={nodes}
@@ -118,6 +123,7 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
           onNodeContextMenu={onNodeContextMenu}
           fitView
         >
+          <TopMenu/>
           <MiniMap />
           {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
           <Background />
