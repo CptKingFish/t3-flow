@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import useUndoable from "use-undoable";
 import ReactFlow, {
   type Node,
@@ -10,6 +10,8 @@ import ReactFlow, {
   type OnNodesDelete,
   type OnEdgesChange,
   type ReactFlowInstance,
+  useReactFlow,
+  type Viewport,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import EditableNode from "./EditableNode";
@@ -20,6 +22,9 @@ import ContextMenu from "./ContextMenu";
 import useKeyboardShortcuts from "../lib/reactflow/hooks";
 import useNodeAndEdgeCallbacks from "../lib/reactflow/callbacks";
 import useUpdateChart from "../lib/reactflow/update";
+import { api } from "~/@/utils/api";
+import { useRouter } from "next/router";
+import { type JsonObject } from "@prisma/client/runtime/library";
 
 interface MenuState {
   id: string;
@@ -29,7 +34,80 @@ interface MenuState {
   bottom?: number;
 }
 
-function FlowChart({ wsConnected }: { wsConnected: boolean }) {
+interface FlowChartProps {
+  wsConnected: boolean;
+  chartId: string;
+}
+
+function FlowChart({ wsConnected, chartId }: FlowChartProps) {
+  const router = useRouter();
+  const [chartTitle, setChartTitle] = useState<string>("");
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const { setViewport } = useReactFlow();
+
+  const {
+    data: chartData,
+    error: chartError,
+    isLoading: chartLoading,
+    refetch: refetchChart,
+    isFetched: chartFetched,
+  } = api.flowchart.getChart.useQuery({
+    id: chartId,
+  });
+
+  const onUpdateNodeText = useCallback((nodeId: string, text: string) => {
+    setUpdateState(true);
+    setNodes((nds) =>
+      nds.map((nd: Node) => {
+        if (nd.id === nodeId) {
+          return { ...nd, data: { ...nd.data, label: text } as Node };
+        }
+        return nd;
+      }),
+    );
+
+    // updateChart();
+  }, []);
+
+  useEffect(() => {
+    if (chartFetched) {
+      const chart = (chartData?.state ?? {}) as JsonObject;
+
+      if (chart?.nodes) {
+        const nodes = chart?.nodes as unknown as Node[];
+        const nodesWithTextUpdate = nodes.map((node) => {
+          if (node.type === "editableNode") {
+            return {
+              ...node,
+              data: {
+                ...(node.data as { label: string }),
+                onUpdateNodeText: onUpdateNodeText,
+              },
+            };
+          }
+          return node;
+        });
+
+        setNodes(nodesWithTextUpdate);
+      } else {
+        setNodes([]);
+      }
+
+      if (chart?.edges) {
+        setEdges(chart?.edges as unknown as Edge[]);
+      } else {
+        setEdges([]);
+      }
+
+      if (chart?.viewport) {
+        setViewport(chart?.viewport as unknown as Viewport);
+      }
+
+      setChartTitle(chartData?.title ?? "");
+    }
+  }, [chartData, chartFetched, setViewport, chartId, chartLoading]);
+
   const nodeTypes = useMemo(
     () => ({
       editableNode: EditableNode,
@@ -41,8 +119,6 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
 
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
   const [updateState, setUpdateState] = useState(false);
   const [elements, setElements, { undo, redo, reset }] = useUndoable({
     nodes: nodes,
@@ -85,6 +161,7 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
   );
 
   useUpdateChart(
+    chartId,
     nodes,
     edges,
     updateState,
@@ -94,6 +171,7 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
     setNodes,
     setEdges,
     setUpdateState,
+    chartFetched,
   );
 
   return (
@@ -124,6 +202,9 @@ function FlowChart({ wsConnected }: { wsConnected: boolean }) {
           <Controls />
         </ReactFlow>
       </div>
+      <Panel position="top-center">
+        <span className="font-semibold">{chartTitle}</span>
+      </Panel>
       <Panel position="top-right">
         <button className="pr-3" onClick={onSave}>
           save

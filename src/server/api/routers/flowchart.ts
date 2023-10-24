@@ -7,6 +7,17 @@ import { createTRPCRouter, publicProcedure } from "~/@/server/api/trpc";
 const ReactFlowJson = z.custom<ReactFlowJsonObject>();
 
 export const flowchartRouter = createTRPCRouter({
+  getCharts: publicProcedure.query(({ ctx }) => {
+    return ctx.db.flowchart.findMany({
+      select: {
+        id: true,
+        title: true,
+        state: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }),
   createChart: publicProcedure
     .input(z.object({ title: z.string() }))
     .mutation(async ({ ctx, input }) => {
