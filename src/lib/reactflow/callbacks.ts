@@ -15,6 +15,8 @@ import {
   type ReactFlowInstance,
   type Node,
   useReactFlow,
+  applyEdgeChanges,
+  type EdgeChange,
 } from "reactflow";
 import { uuid } from "uuidv4";
 
@@ -63,11 +65,11 @@ const useNodeAndEdgeCallbacks = (
   );
 
   const onEdgesChange = useCallback(
-    (changes: NodeChange[]) => {
+    (changes: EdgeChange[]) => {
       setUpdateState(true);
-      setNodes((nds) => applyNodeChanges(changes, nds));
+      setEdges((nds) => applyEdgeChanges(changes, nds));
     },
-    [setNodes, setUpdateState],
+    [setEdges, setUpdateState],
   );
 
   const onConnect = useCallback(

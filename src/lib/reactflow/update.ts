@@ -4,10 +4,12 @@ import {
   useCallback,
   useEffect,
 } from "react";
-import { type Node, type Edge } from "reactflow";
+import { type Node, type Edge, useReactFlow } from "reactflow";
 import { socket } from "../socket/socket";
+import { api } from "~/@/utils/api";
 
 const useUpdateChart = (
+  chartId: string,
   nodes: Node[],
   edges: Edge[],
   updateState: boolean,
@@ -17,7 +19,16 @@ const useUpdateChart = (
   setNodes: (value: SetStateAction<Node[]>) => void,
   setEdges: (value: SetStateAction<Edge[]>) => void,
   setUpdateState: Dispatch<SetStateAction<boolean>>,
+  chartFetched: boolean,
 ) => {
+  const { getViewport } = useReactFlow();
+  const {
+    mutate: updateChart,
+    isLoading: isUpdatingChart,
+    isError: isUpdateChartError,
+    isSuccess: isUpdateChartSuccess,
+  } = api.flowchart.updateChart.useMutation();
+
   const onUpdateNodeText = useCallback(
     (nodeId: string, text: string) => {
       setUpdateState(true);
@@ -45,9 +56,25 @@ const useUpdateChart = (
   useEffect(() => {
     if (!updateState) return;
     triggerUpdate(nodes, edges);
+    if (chartFetched) {
+      updateChart({
+        id: chartId,
+        state: { nodes, edges, viewport: getViewport() },
+      });
+    }
     socket.timeout(5000).emit("chart-updated", { nodes, edges });
     setUpdateState(false);
-  }, [nodes, edges, updateState, triggerUpdate, setUpdateState]);
+  }, [
+    nodes,
+    edges,
+    updateState,
+    triggerUpdate,
+    setUpdateState,
+    updateChart,
+    chartId,
+    getViewport,
+    chartFetched,
+  ]);
 
   useEffect(() => {
     console.log(elements);

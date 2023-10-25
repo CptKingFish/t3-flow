@@ -1,10 +1,16 @@
 import { ReactFlowProvider } from "reactflow";
 import FlowChart from "./FlowChart";
 
-function FlowChartProvider({ wsConnected }: { wsConnected: boolean }) {
+function FlowChartProvider({
+  wsConnected,
+  chartId,
+}: {
+  wsConnected: boolean;
+  chartId: string;
+}) {
   return (
     <ReactFlowProvider>
-      <FlowChart wsConnected={wsConnected} />
+      <FlowChart wsConnected={wsConnected} chartId={chartId} />
     </ReactFlowProvider>
   );
 }
