@@ -8,6 +8,7 @@ import { api } from "~/@/utils/api";
 import SidebarMenu from "../../components/SidebarMenu";
 import ChartsMenu from "../../components/ChartsMenu";
 import { GetServerSidePropsContext } from "next";
+import DeleteChartModal from "~/@/components/DeleteChartModal";
 
 interface FlowChartEditorProps {
   chartId: string;
@@ -15,6 +16,7 @@ interface FlowChartEditorProps {
 
 export default function FlowChartEditor({ chartId }: FlowChartEditorProps) {
   const [openSidebar, setOpenSidebar] = useState(false);
+  const [openDeleteChartModal, setOpenDeleteChartModal] = useState(false);
   const [wsConnected, setWsConnected] = useState(socket.connected);
 
   useEffect(() => {
@@ -42,6 +44,7 @@ export default function FlowChartEditor({ chartId }: FlowChartEditorProps) {
   return (
     <>
       <SidebarMenu openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+      
       <div className="static h-screen w-screen">
         <button
           type="button"

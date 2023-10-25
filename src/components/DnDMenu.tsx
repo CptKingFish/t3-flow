@@ -1,3 +1,6 @@
+import InputNode from "reactflow";
+
+
 function DnDMenu() {
   const onDragStart = (
     event: React.DragEvent<HTMLDivElement>,
@@ -8,7 +11,7 @@ function DnDMenu() {
   };
 
   return (
-    <aside className="">
+    <aside className="mt-12">
       <div className="description">
         You can drag these nodes to the pane on the right.
       </div>
