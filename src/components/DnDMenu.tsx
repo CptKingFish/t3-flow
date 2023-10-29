@@ -43,6 +43,13 @@ function DnDMenu() {
       >
         Editable Node
       </div>
+      <div
+        className=""
+        onDragStart={(event) => onDragStart(event, "testNode")}
+        draggable
+      >
+        Test Node
+      </div>
     </aside>
   );
 }

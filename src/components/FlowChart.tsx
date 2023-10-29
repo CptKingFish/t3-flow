@@ -16,7 +16,8 @@ import ReactFlow, {
   useOnSelectionChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import EditableNode from "./EditableNode";
+import EditableNode from "./nodes/EditableNode";
+import TestNode from "./nodes/TestNode";
 import DnDMenu from "./DnDMenu";
 import DownloadButton from "./DownloadButton";
 import ContextMenu from "./ContextMenu";
@@ -44,7 +45,7 @@ interface FlowChartProps {
 function FlowChart({ wsConnected, chartId }: FlowChartProps) {
   const router = useRouter();
   const [chartTitle, setChartTitle] = useState<string>("");
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodesd, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const { setViewport } = useReactFlow();
 
@@ -79,7 +80,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
       if (chart?.nodes) {
         const nodes = chart?.nodes as unknown as Node[];
         const nodesWithTextUpdate = nodes.map((node) => {
-          if (node.type === "editableNode") {
+          if (node.type === "editableNode" || node.type === "testNode") {
             return {
               ...node,
               data: {
@@ -113,6 +114,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
   const nodeTypes = useMemo(
     () => ({
       editableNode: EditableNode,
+      testNode: TestNode,
     }),
     [],
   );
@@ -123,7 +125,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
 
   const [updateState, setUpdateState] = useState(false);
   const [elements, setElements, { undo, redo, reset }] = useUndoable({
-    nodes: nodes,
+    nodes: nodesd,
     edges: edges,
   });
 
@@ -164,7 +166,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
 
   useUpdateChart(
     chartId,
-    nodes,
+    nodesd,
     edges,
     updateState,
     wsConnected,
@@ -187,7 +189,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
         
         <ReactFlow
           ref={flowRef}
-          nodes={nodes}
+          nodes={nodesd}
           onNodesChange={onNodesChange}
           onNodesDelete={onNodesDelete as OnNodesDelete}
           edges={edges}
