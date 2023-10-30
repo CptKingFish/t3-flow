@@ -45,7 +45,7 @@ interface FlowChartProps {
 function FlowChart({ wsConnected, chartId }: FlowChartProps) {
   const router = useRouter();
   const [chartTitle, setChartTitle] = useState<string>("");
-  const [nodesd, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const { setViewport } = useReactFlow();
 
@@ -72,6 +72,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
 
     // updateChart();
   }, []);
+
 
   useEffect(() => {
     if (chartFetched) {
@@ -125,7 +126,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
 
   const [updateState, setUpdateState] = useState(false);
   const [elements, setElements, { undo, redo, reset }] = useUndoable({
-    nodes: nodesd,
+    nodes: nodes,
     edges: edges,
   });
 
@@ -166,7 +167,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
 
   useUpdateChart(
     chartId,
-    nodesd,
+    nodes,
     edges,
     updateState,
     wsConnected,
@@ -189,7 +190,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
         
         <ReactFlow
           ref={flowRef}
-          nodes={nodesd}
+          nodes={nodes}
           onNodesChange={onNodesChange}
           onNodesDelete={onNodesDelete as OnNodesDelete}
           edges={edges}

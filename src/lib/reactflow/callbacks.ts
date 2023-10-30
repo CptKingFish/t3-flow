@@ -44,10 +44,10 @@ const useNodeAndEdgeCallbacks = (
         const targetChange = changes.find((change) => key in change);
         if (targetChange && key === "resizing") {
           setUpdateState(!(targetChange as NodeDimensionChange)[key]);
-          break;
+
         } else if (targetChange && key === "dragging") {
           setUpdateState(!(targetChange as NodePositionChange)[key]);
-          break;
+
         }
       }
 

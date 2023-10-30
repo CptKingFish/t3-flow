@@ -1,110 +1,117 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Handle, NodeProps, Position, useReactFlow, useUpdateNodeInternals } from 'reactflow';
-import {
-  makeMoveable,
-  DraggableProps,
-  ResizableProps,
-  RotatableProps,
-  Rotatable,
-  Draggable,
-  Resizable,
-  OnResize,
-  OnRotate,
-} from 'react-moveable';
+import { getNamedMiddlewareRegex } from "next/dist/shared/lib/router/utils/route-regex";
+import { useEffect, useState } from "react";
+import { Handle, NodeResizer, Position, useNodes, type Node } from "reactflow";
 
-const Moveable = makeMoveable<DraggableProps & ResizableProps & RotatableProps>([Draggable, Resizable, Rotatable]);
+// const handleStyle = { left: 10 };
 
-export default function ResizeRotateNode({
-  id,
-  data,
-  selected,
-  isConnectable,
+function TestNode({
+    id,
+    data,
+    selected,
+
+    isConnectable,
 }: {
-  id: string;
-  data: {
-    label: string;
-    onUpdateNodeText: (nodeId: string, text: string) => void;
-  };
-  selected: boolean;
-  isConnectable: boolean;
+    id: string;
+    data: {
+        label: string;
+        onUpdateNodeText: (nodeId: string, text: string) => void;
+    };
+    selected: boolean;
+    isConnectable: boolean;
 }) {
-  const nodeRef = useRef<HTMLDivElement | null>(null);
-  const resizeRef = useRef<HTMLDivElement | null>(null);
-  const { setNodes } = useReactFlow();
-  const updateNodeInternals = useUpdateNodeInternals();
-  const [rotation, setRotation] = useState(0);
-  const [resizable, setResizable] = useState(true);
-  const [rotatable, setRotatable] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [width, setWidth] = useState<number>(100);
+    const [height, setHeight] = useState<number>(60);
 
-  useEffect(() => {
-    nodeRef.current = document.querySelector(`.react-flow__node[data-id="${id}"]`);
-  }, [id]);
+    const styles = { fill: "#aaa", strokeWidth: selected ? 2 : 0, stroke: '#fff' };
 
-  const onResize = (evt: OnResize) => {
-    if (!nodeRef.current) {
-      return;
-    }
-    let minWidth = 150
-    let minHeight = 100
+    const onTextChange = (newText: string) => {
+        data.onUpdateNodeText(id, newText);
+    };
 
-    evt.width = Math.max(evt.width, minWidth)
-    evt.height = Math.max(evt.height, minHeight)
+    let nodes = useNodes()
 
-    evt.delta[0] && (nodeRef.current.style.width = `${evt.width}px`);
-    evt.delta[1] && (nodeRef.current.style.height = `${evt.height}px`);
-    if (evt.width != minWidth || evt.height != minHeight) {
-      setNodes((nodes) =>
-        nodes.map((node) => {
-          if (node.id === id) {
-            node.position = {
-              x: evt.direction[0] === -1 ? node.position.x - (evt.delta[0] ? evt.delta[0] : 0) : node.position.x,
-              y: evt.direction[1] === -1 ? node.position.y - (evt.delta[1] ? evt.delta[1] : 0) : node.position.y,
-            };
-            console.log(node)
-          }
-          return node;
-        })
-      );
-    }
-  };
+    useEffect(() => {
+        let node = nodes.find(n => n.id === id)
+        if (node) {
+            setWidth(node.width || 100)
+            setHeight(node.height || 60)
+            console.log("heh?")
+        }
+    }, [nodes])
 
-  const onRotate = (evt: OnRotate) => {
-    setRotation(evt.rotation);
-    updateNodeInternals(id);
-  };
+    // const size = useStore((s) => {
+    //   const node = s.nodeInternals.get(id);
 
-  return (
-    <>
-      <Moveable
-        className="nodrag"
-        resizable={selected && resizable}
-        rotatable={selected && rotatable}
-        hideDefaultLines={!selected}
-        target={resizeRef}
-        onResize={onResize}
-        onRotate={onRotate}
-        origin={true}
-        keepRatio={false}
-        throttleResize={10}
+    //   return {
+    //     width: node.width,
+    //     height: node.height,
+    //   };
+    // });
 
-      />
-      <div
-        ref={resizeRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          background: '#ddd',
-          borderRadius: 15,
-          border: '1px solid #ff0072',
-          backgroundColor: '#ffcce3',
-          padding: 20,
-          transform: `rotate(${rotation}deg)`,
-        }}
-      >
+    // console.log(size);
 
-        <Handle style={{ opacity: 1 }} position={Position.Bottom} type="source" />
-        <Handle style={{ opacity: 1 }} position={Position.Top} type="target" />
-      </div>
-    </>
-  );
+    return (
+        <div className=" h-full rounded">
+            <NodeResizer
+                color="#ff0071"
+                isVisible={selected}
+                minWidth={100}
+                minHeight={30}
+            />
+            <Handle
+                type="target"
+                position={Position.Top}
+                isConnectable={isConnectable}
+            />
+            <svg className="absolute top-0 left-0" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
+                <path d={`M0,${height / 2} L${width / 2},0 L${width},${height / 2} L${width / 2},${height} z`} {...styles} />
+            </svg>
+
+            <div
+                className="min-w-[100px] min-h-[30px] w-full h-full absolute justify-center items-center flex top-0 left-0"
+                onDoubleClick={() => {
+                    setIsEditing(true);
+                }}
+            >
+                {isEditing ? (
+                    <>
+                        <svg className="absolute top-0 left-0 z-0" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
+                            <path d={`M0,${height / 2} L${width / 2},0 L${width},${height / 2} L${width / 2},${height} z`} {...styles} />
+                        </svg>
+                        <textarea
+                            value={data.label}
+                            onChange={(e) => onTextChange(e.target.value)}
+                            onBlur={() => setIsEditing(false)}
+                            className="w-full h-full resize-none overflow-hidden nodrag z-50 bg-transparent flex" 
+                            autoFocus
+                        />
+                    </>
+                ) : (
+                    <h4 className="break-words">{data.label}</h4>
+                )}
+            </div>
+            {/* <Handle
+        type="source"
+        position={Position.Bottom}
+        id="a"
+        style={handleStyle}
+        isConnectable={isConnectable}
+      /> */}
+            <Handle
+                type="source"
+                position={Position.Left}
+                id="b"
+                isConnectable={isConnectable}
+            />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="c"
+                isConnectable={isConnectable}
+            />
+        </div>
+    );
 }
+
+export default TestNode;
