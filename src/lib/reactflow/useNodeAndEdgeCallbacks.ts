@@ -12,13 +12,13 @@ import {
   type NodeChange,
   type Edge,
   type Connection,
-  type ReactFlowInstance,
   type Node,
   useReactFlow,
   applyEdgeChanges,
   type EdgeChange,
 } from "reactflow";
 import { uuid } from "uuidv4";
+import useCustomNodeFunctions from "./useCustomNodeFunctions";
 
 interface MenuState {
   id: string;
@@ -31,70 +31,56 @@ interface MenuState {
 const useNodeAndEdgeCallbacks = (
   setNodes: (value: SetStateAction<Node[]>) => void,
   setEdges: (value: SetStateAction<Edge[]>) => void,
-  setUpdateState: Dispatch<SetStateAction<boolean>>,
+  setShouldSyncChartState: Dispatch<SetStateAction<boolean>>,
   setMenu: (value: SetStateAction<MenuState | null>) => void,
-  reactFlowInstance: ReactFlowInstance | null,
   reactFlowWrapper: RefObject<HTMLInputElement>,
   flowRef: RefObject<HTMLDivElement>,
 ) => {
+  const reactFlowInstance = useReactFlow();
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      setNodes((nds) => applyNodeChanges(changes, nds));
+
       const targetKeys = ["resizing", "dragging"];
       for (const key of targetKeys) {
         const targetChange = changes.find((change) => key in change);
         if (targetChange && key === "resizing") {
-          setUpdateState(!(targetChange as NodeDimensionChange)[key]);
-
+          setShouldSyncChartState(!(targetChange as NodeDimensionChange)[key]);
         } else if (targetChange && key === "dragging") {
-          setUpdateState(!(targetChange as NodePositionChange)[key]);
-
+          setShouldSyncChartState(!(targetChange as NodePositionChange)[key]);
         }
       }
-      console.log(changes)
-      setNodes((nds) => applyNodeChanges(changes, nds));
     },
-    [setNodes, setUpdateState],
+    [setNodes, setShouldSyncChartState],
   );
 
   const onNodesDelete = useCallback(
     (changes: NodeChange[]) => {
-      setUpdateState(true);
       setNodes((nds) => applyNodeChanges(changes, nds));
+      setShouldSyncChartState(true);
     },
-    [setNodes, setUpdateState],
+    [setNodes, setShouldSyncChartState],
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      setUpdateState(true);
       setEdges((nds) => applyEdgeChanges(changes, nds));
+      setShouldSyncChartState(true);
     },
-    [setEdges, setUpdateState],
+    [setEdges, setShouldSyncChartState],
   );
 
   const onConnect = useCallback(
     (params: Connection) => {
-      setUpdateState(true);
       setEdges((eds) => addEdge(params, eds));
+      setShouldSyncChartState(true);
     },
-    [setEdges, setUpdateState],
+    [setEdges, setShouldSyncChartState],
   );
 
-  const onUpdateNodeText = useCallback(
-    (nodeId: string, text: string) => {
-      setUpdateState(true);
-      setNodes((nds) =>
-        nds.map((nd: Node) => {
-          if (nd.id === nodeId) {
-            return { ...nd, data: { ...nd.data, label: text } as Node };
-          }
-          return nd;
-        }),
-      );
-
-      // updateChart();
-    },
-    [setNodes, setUpdateState],
+  const { onUpdateNodeText } = useCustomNodeFunctions(
+    setNodes,
+    setShouldSyncChartState,
   );
 
   const onDrop = useCallback(
@@ -151,17 +137,15 @@ const useNodeAndEdgeCallbacks = (
         };
       }
 
-      setUpdateState(true);
       setNodes((nds) => nds.concat(newNode));
-
-      // updateChart();
+      setShouldSyncChartState(true);
     },
     [
       onUpdateNodeText,
       reactFlowInstance,
       reactFlowWrapper,
       setNodes,
-      setUpdateState,
+      setShouldSyncChartState,
     ],
   );
 

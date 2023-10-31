@@ -1,14 +1,9 @@
-import Head from "next/head";
-
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState } from "react";
 import { socket } from "../../lib/socket/socket";
-import FlowChartProvider from "../../components/FlowChartProvider";
+import FlowChartProvider from "../../components/FlowChartWrapper";
 
-import { api } from "~/@/utils/api";
 import SidebarMenu from "../../components/SidebarMenu";
-import ChartsMenu from "../../components/ChartsMenu";
-import { GetServerSidePropsContext } from "next";
-import DeleteChartModal from "~/@/components/DeleteChartModal";
+import { type GetServerSidePropsContext } from "next";
 
 interface FlowChartEditorProps {
   chartId: string;
@@ -44,7 +39,7 @@ export default function FlowChartEditor({ chartId }: FlowChartEditorProps) {
   return (
     <>
       <SidebarMenu openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
-      
+
       <div className="static h-screen w-screen">
         <button
           type="button"

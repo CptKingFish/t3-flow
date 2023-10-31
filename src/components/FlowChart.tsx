@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import { useState, useRef, useMemo } from "react";
 import useUndoable from "use-undoable";
 import TopMenu from "./TopMenu";
 import ReactFlow, {
@@ -10,10 +10,7 @@ import ReactFlow, {
   type Edge,
   type OnNodesDelete,
   type OnEdgesChange,
-  type ReactFlowInstance,
   useReactFlow,
-  type Viewport,
-  useOnSelectionChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import EditableNode from "./nodes/EditableNode";
@@ -22,12 +19,12 @@ import DnDMenu from "./DnDMenu";
 import DownloadButton from "./DownloadButton";
 import ContextMenu from "./ContextMenu";
 
-import useKeyboardShortcuts from "../lib/reactflow/hooks";
-import useNodeAndEdgeCallbacks from "../lib/reactflow/callbacks";
-import useUpdateChart from "../lib/reactflow/update";
+import useInitializeChartOnFetch from "../lib/reactflow/useInitializeChartOnFetch";
+import useNodeAndEdgeCallbacks from "../lib/reactflow/useNodeAndEdgeCallbacks";
+import useUpdateChartListeners from "../lib/reactflow/useUpdateChartListeners";
+import useKeyboardShortcuts from "../lib/reactflow/useKeyboardShortcuts";
+
 import { api } from "~/@/utils/api";
-import { useRouter } from "next/router";
-import { type JsonObject } from "@prisma/client/runtime/library";
 
 interface MenuState {
   id: string;
@@ -43,11 +40,28 @@ interface FlowChartProps {
 }
 
 function FlowChart({ wsConnected, chartId }: FlowChartProps) {
-  const router = useRouter();
+  const { setViewport } = useReactFlow();
   const [chartTitle, setChartTitle] = useState<string>("");
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const { setViewport } = useReactFlow();
+  const [shouldSyncChartState, setShouldSyncChartState] = useState(false);
+  const [menu, setMenu] = useState<MenuState | null>(null);
+
+  const nodeTypes = useMemo(
+    () => ({
+      editableNode: EditableNode,
+      testNode: TestNode,
+    }),
+    [],
+  );
+
+  const reactFlowWrapper = useRef<HTMLInputElement>(null);
+  const flowRef = useRef<HTMLDivElement>(null);
+
+  const [elements, setElements, { undo, redo, reset }] = useUndoable({
+    nodes: nodes,
+    edges: edges,
+  });
 
   const {
     data: chartData,
@@ -59,90 +73,15 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
     id: chartId,
   });
 
-  const onUpdateNodeText = useCallback((nodeId: string, text: string) => {
-    setUpdateState(true);
-    setNodes((nds) =>
-      nds.map((nd: Node) => {
-        if (nd.id === nodeId) {
-          return { ...nd, data: { ...nd.data, label: text } as Node };
-        }
-        return nd;
-      }),
-    );
-
-    // updateChart();
-  }, []);
-
-
-  useEffect(() => {
-    if (chartFetched) {
-      const chart = (chartData?.state ?? {}) as JsonObject;
-
-      if (chart?.nodes) {
-        const nodes = chart?.nodes as unknown as Node[];
-        const nodesWithTextUpdate = nodes.map((node) => {
-          if (node.type === "editableNode" || node.type === "testNode") {
-            return {
-              ...node,
-              data: {
-                ...(node.data as { label: string }),
-                onUpdateNodeText: onUpdateNodeText,
-              },
-            };
-          }
-          return node;
-        });
-
-        setNodes(nodesWithTextUpdate);
-      } else {
-        setNodes([]);
-      }
-
-      if (chart?.edges) {
-        setEdges(chart?.edges as unknown as Edge[]);
-      } else {
-        setEdges([]);
-      }
-
-      if (chart?.viewport) {
-        setViewport(chart?.viewport as unknown as Viewport);
-      }
-
-      setChartTitle(chartData?.title ?? "");
-    }
-  }, [chartData, chartFetched, setViewport, chartId, chartLoading]);
-
-  const nodeTypes = useMemo(
-    () => ({
-      editableNode: EditableNode,
-      testNode: TestNode,
-    }),
-    [],
+  useInitializeChartOnFetch(
+    chartFetched,
+    chartData,
+    setChartTitle,
+    setNodes,
+    setEdges,
+    setViewport,
+    setShouldSyncChartState,
   );
-
-  const reactFlowWrapper = useRef<HTMLInputElement>(null);
-  const [reactFlowInstance, setReactFlowInstance] =
-    useState<ReactFlowInstance | null>(null);
-
-  const [updateState, setUpdateState] = useState(false);
-  const [elements, setElements, { undo, redo, reset }] = useUndoable({
-    nodes: nodes,
-    edges: edges,
-  });
-
-  const [menu, setMenu] = useState<MenuState | null>(null);
-  const flowRef = useRef<HTMLDivElement>(null);
-
-  const selectAll = useCallback(() => {
-    //loop through nodes array and add a selected:true property to each node
-    setNodes((nds) =>
-      nds.map((nd) => {
-        return { ...nd, selected: true };
-      }),
-    );
-  }, []);
-
-  useKeyboardShortcuts(undo, selectAll);
 
   const {
     onNodesChange,
@@ -158,28 +97,27 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
   } = useNodeAndEdgeCallbacks(
     setNodes,
     setEdges,
-    setUpdateState,
+    setShouldSyncChartState,
     setMenu,
-    reactFlowInstance,
     reactFlowWrapper,
     flowRef,
   );
 
-  useUpdateChart(
+  useUpdateChartListeners(
     chartId,
     nodes,
     edges,
-    updateState,
+    shouldSyncChartState,
     wsConnected,
     elements,
     setElements,
     setNodes,
     setEdges,
-    setUpdateState,
+    setShouldSyncChartState,
     chartFetched,
   );
 
-  
+  useKeyboardShortcuts(undo, setNodes);
 
   return (
     <>
@@ -187,7 +125,6 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
         className="h-screen w-screen bg-white text-black"
         ref={reactFlowWrapper}
       >
-        
         <ReactFlow
           ref={flowRef}
           nodes={nodes}
@@ -197,14 +134,14 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
           onEdgesChange={onEdgesChange as OnEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
-          onInit={setReactFlowInstance}
+          // onInit={setReactFlowInstance}
           onDrop={onDrop as unknown as React.DragEventHandler<HTMLDivElement>}
           onDragOver={onDragOver}
           onPaneClick={onPaneClick}
           onNodeContextMenu={onNodeContextMenu}
           fitView
         >
-          <TopMenu/>
+          <TopMenu />
           <MiniMap />
           {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
           <Background />

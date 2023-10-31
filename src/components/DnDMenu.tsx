@@ -1,7 +1,4 @@
-import InputNode from "reactflow";
-
-
-function DnDMenu() {
+export default function DnDMenu() {
   const onDragStart = (
     event: React.DragEvent<HTMLDivElement>,
     nodeType: string,
@@ -53,5 +50,3 @@ function DnDMenu() {
     </aside>
   );
 }
-
-export default DnDMenu;

@@ -1,7 +1,7 @@
 import { ReactFlowProvider } from "reactflow";
 import FlowChart from "./FlowChart";
 
-function FlowChartProvider({
+export default function FlowChartWrapper({
   wsConnected,
   chartId,
 }: {
@@ -14,5 +14,3 @@ function FlowChartProvider({
     </ReactFlowProvider>
   );
 }
-
-export default FlowChartProvider;
