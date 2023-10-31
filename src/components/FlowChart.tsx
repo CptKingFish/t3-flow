@@ -81,7 +81,15 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
       if (chart?.nodes) {
         const nodes = chart?.nodes as unknown as Node[];
         const nodesWithTextUpdate = nodes.map((node) => {
-          if (node.type === "editableNode" || node.type === "testNode") {
+          if (node.type === "editableNode") {
+            return {
+              ...node,
+              data: {
+                ...(node.data as { label: string }),
+                onUpdateNodeText: onUpdateNodeText,
+              },
+            };
+          }else if (node.type === "testNode") {
             return {
               ...node,
               data: {

@@ -50,7 +50,6 @@ const useNodeAndEdgeCallbacks = (
 
         }
       }
-      console.log(changes)
       setNodes((nds) => applyNodeChanges(changes, nds));
     },
     [setNodes, setUpdateState],
@@ -75,7 +74,12 @@ const useNodeAndEdgeCallbacks = (
   const onConnect = useCallback(
     (params: Connection) => {
       setUpdateState(true);
-      setEdges((eds) => addEdge(params, eds));
+      console.log(params)
+      setEdges((eds) => {
+        console.log(eds)
+        let edges = addEdge({...params,type:"step"}, eds)
+        return edges
+      });
     },
     [setEdges, setUpdateState],
   );
@@ -121,27 +125,41 @@ const useNodeAndEdgeCallbacks = (
         y: event.clientY - reactFlowBounds.top,
       });
 
-      let newNode: {
-        id: string;
-        type: string;
-        position: { x: number; y: number };
-        className?: string;
-        data: {
-          label: string;
-          onUpdateNodeText?: (nodeId: string, text: string) => void;
-        };
-      };
-      if (type === "editableNode" || type === "testNode") {
+      let newNode:Node
+      if (type === "editableNode") {
         newNode = {
           id: `dndnode_${uuid()}`,
           type,
           position,
           className: "w-[200px] h-[100px]",
+          width:150,
+          height:100,
           data: {
             label: `${type} node`,
             onUpdateNodeText: onUpdateNodeText,
           },
-        };
+          style: {
+            width:150,
+            height:100,
+          }
+        } as Node;
+      }else if (type === "testNode") {
+        newNode = {
+          id: `dndnode_${uuid()}`,
+          type,
+          position,
+          className: "w-[200px] h-[100px]",
+          width:150,
+          height:100,
+          data: {
+            label: `Decision node`,
+            onUpdateNodeText: onUpdateNodeText,
+          },
+          style: {
+            width:150,
+            height:100,
+          }
+        } as Node;
       } else {
         newNode = {
           id: `dndnode_${uuid()}`,
