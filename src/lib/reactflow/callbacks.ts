@@ -74,10 +74,10 @@ const useNodeAndEdgeCallbacks = (
   const onConnect = useCallback(
     (params: Connection) => {
       setUpdateState(true);
-      console.log(params)
+
       setEdges((eds) => {
-        console.log(eds)
-        let edges = addEdge({...params,type:"step"}, eds)
+
+        let edges = addEdge({ ...params, type: "step" }, eds)
         return edges
       });
     },
@@ -125,39 +125,39 @@ const useNodeAndEdgeCallbacks = (
         y: event.clientY - reactFlowBounds.top,
       });
 
-      let newNode:Node
+      let newNode: Node
       if (type === "editableNode") {
         newNode = {
           id: `dndnode_${uuid()}`,
           type,
           position,
           className: "w-[200px] h-[100px]",
-          width:150,
-          height:100,
+          width: 150,
+          height: 100,
           data: {
             label: `${type} node`,
             onUpdateNodeText: onUpdateNodeText,
           },
           style: {
-            width:150,
-            height:100,
+            width: 150,
+            height: 100,
           }
         } as Node;
-      }else if (type === "testNode") {
+      } else if (type === "decisionNode") {
         newNode = {
           id: `dndnode_${uuid()}`,
           type,
           position,
           className: "w-[200px] h-[100px]",
-          width:150,
-          height:100,
+          width: 150,
+          height: 100,
           data: {
             label: `Decision node`,
             onUpdateNodeText: onUpdateNodeText,
           },
           style: {
-            width:150,
-            height:100,
+            width: 150,
+            height: 100,
           }
         } as Node;
       } else {
@@ -239,10 +239,10 @@ const useNodeAndEdgeCallbacks = (
       if (!localStorage.getItem(flowKey)) return;
       const flow = JSON.parse(localStorage.getItem(flowKey) ?? "") as
         | {
-            nodes: Node[];
-            edges: Edge[];
-            viewport: { x: number; y: number; zoom: number };
-          }
+          nodes: Node[];
+          edges: Edge[];
+          viewport: { x: number; y: number; zoom: number };
+        }
         | "";
 
       if (flow !== "") {

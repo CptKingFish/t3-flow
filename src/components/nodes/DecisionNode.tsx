@@ -1,11 +1,11 @@
 import { getNamedMiddlewareRegex } from "next/dist/shared/lib/router/utils/route-regex";
 import { useEffect, useState } from "react";
 import { Handle, NodeResizer, Position, useNodes, type Node } from "reactflow";
-import Diamond from "./Shapes"
+import Shape from "./Shapes";
 
 // const handleStyle = { left: 10 };
 
-function TestNode({
+function DecisionNode({
     id,
     data,
     selected,
@@ -60,7 +60,7 @@ function TestNode({
                 position={Position.Top}
                 isConnectable={isConnectable}
             />
-            <Diamond width={width} height={height}/>
+            <Shape type="diamond" className="absolute top-0 left-0" width={width} height={height}/>
 
             <div
                 className="min-w-[100px] min-h-[30px] w-full h-full absolute justify-center items-center flex top-0 left-0"
@@ -70,7 +70,7 @@ function TestNode({
             >
                 {isEditing ? (
                     <>
-                        <Diamond width={width} height={height}/>
+                        <Shape type="diamond" className="absolute top-0 left-0" width={width} height={height}/>
                         <textarea
                             value={data.label}
                             onChange={(e) => onTextChange(e.target.value)}
@@ -106,4 +106,4 @@ function TestNode({
     );
 }
 
-export default TestNode;
+export default DecisionNode;

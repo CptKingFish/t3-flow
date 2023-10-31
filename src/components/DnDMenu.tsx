@@ -1,8 +1,7 @@
 import InputNode from "reactflow";
-import Diamond from "./nodes/Shapes";
+import Shape from "./nodes/Shapes";
 
 function DnDMenu() {
-  const styles = { fill: "#aaa", strokeWidth: 2, stroke: '#fff' };
   const onDragStart = (
     event: React.DragEvent<HTMLDivElement>,
     nodeType: string,
@@ -48,13 +47,11 @@ function DnDMenu() {
         </div>
         <div
           className="row"
-          onDragStart={(event) => onDragStart(event, "testNode")}
+          onDragStart={(event) => onDragStart(event, "decisionNode")}
           draggable
         >
           <div className="w-full h-full relative">
-            <svg className="absolute -z-10" width="132" height="88" viewBox={`0 0 ${132} ${88}`}>
-              <path d={`M0,${88 / 2} L${132 / 2},0 L${132},${88 / 2} L${132 / 2},${88} z`}  {...styles} />
-            </svg>
+            <Shape type="diamond" className = "absolute -z-10" width={132} height={88} override={true}/>
             <div className="absolute z-10 items-center justify-center top-8 left-4">Decision node</div>
           </div>
 

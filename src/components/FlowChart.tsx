@@ -17,7 +17,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import EditableNode from "./nodes/EditableNode";
-import TestNode from "./nodes/TestNode";
+import DecisionNode from "./nodes/DecisionNode";
 import DnDMenu from "./DnDMenu";
 import DownloadButton from "./DownloadButton";
 import ContextMenu from "./ContextMenu";
@@ -89,7 +89,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
                 onUpdateNodeText: onUpdateNodeText,
               },
             };
-          }else if (node.type === "testNode") {
+          }else if (node.type === "decisionNode") {
             return {
               ...node,
               data: {
@@ -123,7 +123,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
   const nodeTypes = useMemo(
     () => ({
       editableNode: EditableNode,
-      testNode: TestNode,
+      decisionNode: DecisionNode,
     }),
     [],
   );
