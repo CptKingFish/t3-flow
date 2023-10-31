@@ -16,7 +16,8 @@ import ReactFlow, {
   useOnSelectionChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import EditableNode from "./EditableNode";
+import EditableNode from "./nodes/EditableNode";
+import TestNode from "./nodes/TestNode";
 import DnDMenu from "./DnDMenu";
 import DownloadButton from "./DownloadButton";
 import ContextMenu from "./ContextMenu";
@@ -72,6 +73,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
     // updateChart();
   }, []);
 
+
   useEffect(() => {
     if (chartFetched) {
       const chart = (chartData?.state ?? {}) as JsonObject;
@@ -79,7 +81,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
       if (chart?.nodes) {
         const nodes = chart?.nodes as unknown as Node[];
         const nodesWithTextUpdate = nodes.map((node) => {
-          if (node.type === "editableNode") {
+          if (node.type === "editableNode" || node.type === "testNode") {
             return {
               ...node,
               data: {
@@ -113,6 +115,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
   const nodeTypes = useMemo(
     () => ({
       editableNode: EditableNode,
+      testNode: TestNode,
     }),
     [],
   );

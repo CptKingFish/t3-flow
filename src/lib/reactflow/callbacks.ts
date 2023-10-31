@@ -44,13 +44,13 @@ const useNodeAndEdgeCallbacks = (
         const targetChange = changes.find((change) => key in change);
         if (targetChange && key === "resizing") {
           setUpdateState(!(targetChange as NodeDimensionChange)[key]);
-          break;
+
         } else if (targetChange && key === "dragging") {
           setUpdateState(!(targetChange as NodePositionChange)[key]);
-          break;
+
         }
       }
-
+      console.log(changes)
       setNodes((nds) => applyNodeChanges(changes, nds));
     },
     [setNodes, setUpdateState],
@@ -131,7 +131,7 @@ const useNodeAndEdgeCallbacks = (
           onUpdateNodeText?: (nodeId: string, text: string) => void;
         };
       };
-      if (type === "editableNode") {
+      if (type === "editableNode" || type === "testNode") {
         newNode = {
           id: `dndnode_${uuid()}`,
           type,
