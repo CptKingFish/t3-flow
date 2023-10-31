@@ -1,6 +1,7 @@
 import { getNamedMiddlewareRegex } from "next/dist/shared/lib/router/utils/route-regex";
 import { useEffect, useState } from "react";
 import { Handle, NodeResizer, Position, useNodes, type Node } from "reactflow";
+import Diamond from "./Shapes"
 
 // const handleStyle = { left: 10 };
 
@@ -8,7 +9,6 @@ function TestNode({
     id,
     data,
     selected,
-
     isConnectable,
 }: {
     id: string;
@@ -22,9 +22,7 @@ function TestNode({
     const [isEditing, setIsEditing] = useState(false);
     const [width, setWidth] = useState<number>(100);
     const [height, setHeight] = useState<number>(60);
-
-    const styles = { fill: "#aaa", strokeWidth: selected ? 2 : 0, stroke: '#fff' };
-
+    const styles = { fill: "#aaa", stroke: '#fff' };
     const onTextChange = (newText: string) => {
         data.onUpdateNodeText(id, newText);
     };
@@ -36,7 +34,6 @@ function TestNode({
         if (node) {
             setWidth(node.width || 100)
             setHeight(node.height || 60)
-            console.log("heh?")
         }
     }, [nodes])
 
@@ -64,7 +61,7 @@ function TestNode({
                 position={Position.Top}
                 isConnectable={isConnectable}
             />
-            <svg className="absolute top-0 left-0" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
+            <svg className="absolute top-0 left-0 border-black border" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
                 <path d={`M0,${height / 2} L${width / 2},0 L${width},${height / 2} L${width / 2},${height} z`} {...styles} />
             </svg>
 
@@ -76,14 +73,14 @@ function TestNode({
             >
                 {isEditing ? (
                     <>
-                        <svg className="absolute top-0 left-0 z-0" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
+                        <svg className="absolute top-0 left-0 border-black border" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
                             <path d={`M0,${height / 2} L${width / 2},0 L${width},${height / 2} L${width / 2},${height} z`} {...styles} />
                         </svg>
                         <textarea
                             value={data.label}
                             onChange={(e) => onTextChange(e.target.value)}
                             onBlur={() => setIsEditing(false)}
-                            className="w-full h-full resize-none overflow-hidden nodrag z-50 bg-transparent flex" 
+                            className="w-full h-full resize-none overflow-hidden nodrag z-50 bg-transparent flex"
                             autoFocus
                         />
                     </>
