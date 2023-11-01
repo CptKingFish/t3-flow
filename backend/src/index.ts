@@ -27,11 +27,6 @@ io.on("connection", (socket) => {
     const senderSocketId = socket.id;
     console.log(`chart-updated from ${senderSocketId}`);
 
-    console.log(`nodes`);
-    console.dir(nodes);
-    console.log(`edges`);
-    console.dir(edges);
-
     // broadcast to all other clients except sender
     socket.broadcast.emit("chart-updated", { nodes, edges });
   });
