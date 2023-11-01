@@ -107,33 +107,29 @@ const useNodeAndEdgeCallbacks = (
         y: event.clientY - reactFlowBounds.top,
       });
 
+      let nodeTypes = ["editableNode", "decisionNode","dataNode","parallelogramNode","terminatorNode"]
+      let width = 150
+      let height = 100
+      if (type === "terminatorNode"){
+        height = 50
+      }
+
       let newNode: Node;
-      if (type === "editableNode") {
+      if (nodeTypes.includes(type as string)) {
         newNode = {
           id: `dndnode_${uuid()}`,
           type,
           position,
           className: "w-[200px] h-[100px]",
+          width: width,
+          height: height,
           data: {
-            label: `${type} node`,
-            onUpdateNodeText: onUpdateNodeText,
-          },
-        };
-      }else if (type === "decisionNode" || type === "dataNode") {
-        newNode = {
-          id: `dndnode_${uuid()}`,
-          type,
-          position,
-          className: "w-[200px] h-[100px]",
-          width: 150,
-          height: 100,
-          data: {
-            label: `Decision node`,
+            label: `${type}`,
             onUpdateNodeText: onUpdateNodeText,
           },
           style: {
-            width: 150,
-            height: 100,
+            width: width,
+            height: height,
           }
         } as Node;
       } else {
