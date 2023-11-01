@@ -13,9 +13,13 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
+
 import EditableNode from "./nodes/EditableNode";
 import DecisionNode from "./nodes/DecisionNode";
 import DataNode from "./nodes/DataNode";
+import ParallelogramNode from "./nodes/ParallelogramNode";
+import TerminatorNode from "./nodes/TerminatorNode";
+
 import DnDMenu from "./DnDMenu";
 import DownloadButton from "./DownloadButton";
 import ContextMenu from "./ContextMenu";
@@ -53,6 +57,8 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
       editableNode: EditableNode,
       decisionNode: DecisionNode,
       dataNode: DataNode,
+      parallelogramNode: ParallelogramNode,
+      terminatorNode: TerminatorNode,
     }),
     [],
   );

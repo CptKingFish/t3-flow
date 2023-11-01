@@ -1,8 +1,8 @@
 import { getNamedMiddlewareRegex } from "next/dist/shared/lib/router/utils/route-regex";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Handle, NodeResizer, Position, useNodes, type Node } from "reactflow";
 import Shape from "./Shapes";
-
+import { useEditContext } from "~/@/pages/_app";
 // const handleStyle = { left: 10 };
 
 function DataNode({
@@ -36,6 +36,16 @@ function DataNode({
         }
     }, [nodes])
 
+    const { edit, setEdit } = useEditContext();
+
+    useEffect(() => {
+        if (isEditing) {
+            setEdit(true)
+        } else {
+            setEdit(false)
+        }
+    }, [isEditing])
+
     return (
         <div className="h-full rounded">
             <NodeResizer
@@ -49,7 +59,7 @@ function DataNode({
                 position={Position.Top}
                 isConnectable={isConnectable}
             />
-            <Shape type="parallelogram" className="absolute top-0 left-0 -z-10" width={width} height={height} />
+            <Shape type="rectangle" className="absolute top-0 left-0 -z-10" width={width} height={height} />
 
             <div
                 className="min-w-[100px] min-h-[30px] w-full h-full absolute justify-center items-center flex top-0 left-0"
@@ -59,7 +69,7 @@ function DataNode({
             >
                 {isEditing ? (
                     <>
-                        <Shape type="parallelogram" className="absolute top-0 left-0" width={width} height={height} />
+                        <Shape type="rectangle" className="absolute top-0 left-0" width={width} height={height} />
                         <textarea
                             value={data.label}
                             onChange={(e) => onTextChange(e.target.value)}

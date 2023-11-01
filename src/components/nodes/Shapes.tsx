@@ -32,7 +32,8 @@ export default function Shape({type, width, height,className,override }:{ type:s
           />
         ),
         'triangle':  <path d={`M0,${height} L${width / 2},0 L${width},${height} z`} {...styles} />,
-        'parallelogram':  <path d={`M0,${height} L${width * 0.25},0 L${width},0 L${width - width * 0.25},${height} z`} {...styles} />
+        'parallelogram':  <path d={`M0,${height} L${width * 0.25},0 L${width},0 L${width - width * 0.25},${height} z`} {...styles} />,
+        'rectangle': <rect x={0} y={0} width={width} height={height} {...styles} />,
       };
 
 

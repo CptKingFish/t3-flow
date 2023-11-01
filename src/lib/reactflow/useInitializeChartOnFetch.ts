@@ -37,7 +37,7 @@ export default function useInitializeChartOnFetch(
   useEffect(() => {
     if (chartFetched) {
       const chart = (chartData?.state ?? {}) as JsonObject;
-      const nodeTypes = ["editableNode", "decisionNode","dataNode"]
+      const nodeTypes = ["editableNode", "decisionNode","dataNode","parallelogramNode","terminatorNode"]
 
       if (chart?.nodes) {
         const nodes = chart?.nodes as unknown as Node[];

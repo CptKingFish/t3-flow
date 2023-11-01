@@ -46,7 +46,7 @@ export default function DnDMenu() {
           Editable Node
         </div>
         <div
-          className="row h-24"
+          className="row h-28"
           onDragStart={(event) => onDragStart(event, "decisionNode")}
           draggable
         >
@@ -57,13 +57,35 @@ export default function DnDMenu() {
 
         </div>
         <div
-          className="row h-24"
+          className="row h-28"
+          onDragStart={(event) => onDragStart(event, "parallelogramNode")}
+          draggable
+        >
+          <div className="w-full h-full relative">
+            <Shape type="parallelogram" className = "absolute -z-10" width={150} height={80} override={true}/>
+            <div className="absolute z-10 items-center justify-center top-8 left-7">Parallelogram<br/> node</div>
+          </div>
+
+        </div>
+        <div
+          className="row h-28"
           onDragStart={(event) => onDragStart(event, "dataNode")}
           draggable
         >
           <div className="w-full h-full relative">
-            <Shape type="parallelogram" className = "absolute -z-10" width={132} height={88} override={true}/>
+            <Shape type="rectangle" className = "absolute -z-10" width={132} height={88} override={true}/>
             <div className="absolute z-10 items-center justify-center top-8 left-7">Data node</div>
+          </div>
+
+        </div>
+        <div
+          className="row h-28"
+          onDragStart={(event) => onDragStart(event, "terminatorNode")}
+          draggable
+        >
+          <div className="w-full h-full relative">
+            <Shape type="round-rect" className = "absolute -z-10" width={132} height={88} override={true}/>
+            <div className="absolute z-10 items-center justify-center top-8 left-2">Terminator node</div>
           </div>
 
         </div>

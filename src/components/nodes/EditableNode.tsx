@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Handle, NodeResizer, Position } from "reactflow";
+import { useEditContext } from "~/@/pages/_app";
 
 function TextUpdaterNode({
   id,
@@ -21,16 +22,15 @@ function TextUpdaterNode({
     data.onUpdateNodeText(id, newText);
   };
 
-  // const size = useStore((s) => {
-  //   const node = s.nodeInternals.get(id);
+  const { edit, setEdit } = useEditContext();
 
-  //   return {
-  //     width: node.width,
-  //     height: node.height,
-  //   };
-  // });
-
-  // console.log(size);
+  useEffect(() => {
+    if (isEditing) {
+      setEdit(true)
+    } else {
+      setEdit(false)
+    }
+  }, [isEditing])
 
   return (
     <div className="h-full rounded border border-black p-3">

@@ -1,12 +1,12 @@
 import { getNamedMiddlewareRegex } from "next/dist/shared/lib/router/utils/route-regex";
-import { useEffect, useState, useContext, use } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Handle, NodeResizer, Position, useNodes, type Node } from "reactflow";
 import Shape from "./Shapes";
 import { useEditContext } from "~/@/pages/_app";
 
 // const handleStyle = { left: 10 };
 
-function DecisionNode({
+function DataNode({
     id,
     data,
     selected,
@@ -42,9 +42,11 @@ function DecisionNode({
     useEffect(() => {
         if (isEditing) {
             setEdit(true)
+
         } else {
             setEdit(false)
         }
+
     }, [isEditing])
 
     return (
@@ -60,7 +62,7 @@ function DecisionNode({
                 position={Position.Top}
                 isConnectable={isConnectable}
             />
-            <Shape type="diamond" className="absolute top-0 left-0 -z-10" width={width} height={height} />
+            <Shape type="parallelogram" className="absolute top-0 left-0 -z-10" width={width} height={height} />
 
             <div
                 className="min-w-[100px] min-h-[30px] w-full h-full absolute justify-center items-center flex top-0 left-0"
@@ -70,7 +72,7 @@ function DecisionNode({
             >
                 {isEditing ? (
                     <>
-                        <Shape type="diamond" className="absolute top-0 left-0" width={width} height={height} />
+                        <Shape type="parallelogram" className="absolute top-0 left-0" width={width} height={height} />
                         <textarea
                             value={data.label}
                             onChange={(e) => onTextChange(e.target.value)}
@@ -83,14 +85,13 @@ function DecisionNode({
                     <h4 className="break-words">{data.label}</h4>
                 )}
             </div>
-            {/* <Handle
-        type="source"
-        position={Position.Bottom}
-        id="a"
-        style={handleStyle}
-        isConnectable={isConnectable}
-      /> */}
             <Handle
+                type="source"
+                position={Position.Bottom}
+                id="a"
+                isConnectable={isConnectable}
+            />
+            {/* <Handle
                 type="source"
                 position={Position.Left}
                 id="b"
@@ -101,9 +102,9 @@ function DecisionNode({
                 position={Position.Right}
                 id="c"
                 isConnectable={isConnectable}
-            />
+            /> */}
         </div>
     );
 }
 
-export default DecisionNode;
+export default DataNode;

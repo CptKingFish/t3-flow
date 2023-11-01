@@ -3,8 +3,10 @@ import {
   type SetStateAction,
   useCallback,
   useEffect,
+  useContext,
 } from "react";
 import { type Node } from "reactflow";
+import {useEditContext } from "~/@/pages/_app";
 
 const useKeyboardShortcuts = (
   undo: () => void,
@@ -19,11 +21,14 @@ const useKeyboardShortcuts = (
     );
   }, [setNodes]);
 
+  const { edit, setEdit } = useEditContext()
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.ctrlKey && event.key === "z") {
         undo();
-      } else if (event.ctrlKey && event.key === "a") {
+      } else if (event.ctrlKey && event.key === "a" && !edit) {
+        console.log(edit)
         event.preventDefault();
         selectAll();
       }
@@ -34,7 +39,7 @@ const useKeyboardShortcuts = (
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectAll, undo]);
+  }, [selectAll, undo,edit]);
 };
 
 export default useKeyboardShortcuts;
