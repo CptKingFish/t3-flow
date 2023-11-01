@@ -7,20 +7,21 @@ import {
 import { type Node, type Edge, useReactFlow } from "reactflow";
 import { socket } from "../socket/socket";
 import { api } from "~/@/utils/api";
+import useCustomNodeFunctions from "./useCustomNodeFunctions";
 
-const useUpdateChart = (
+export default function useUpdateChartListeners(
   chartId: string,
   nodes: Node[],
   edges: Edge[],
-  updateState: boolean,
+  shouldSyncChartState: boolean,
   wsConnected: boolean,
   elements: { nodes: Node[]; edges: Edge[] } | undefined,
   setElements: (elements: { nodes: Node[]; edges: Edge[] }) => void,
   setNodes: (value: SetStateAction<Node[]>) => void,
   setEdges: (value: SetStateAction<Edge[]>) => void,
-  setUpdateState: Dispatch<SetStateAction<boolean>>,
+  setShouldSyncChartState: Dispatch<SetStateAction<boolean>>,
   chartFetched: boolean,
-) => {
+) {
   const { getViewport } = useReactFlow();
   const {
     mutate: updateChart,
@@ -29,21 +30,9 @@ const useUpdateChart = (
     isSuccess: isUpdateChartSuccess,
   } = api.flowchart.updateChart.useMutation();
 
-  const onUpdateNodeText = useCallback(
-    (nodeId: string, text: string) => {
-      setUpdateState(true);
-      setNodes((nds) =>
-        nds.map((nd: Node) => {
-          if (nd.id === nodeId) {
-            return { ...nd, data: { ...nd.data, label: text } as Node };
-          }
-          return nd;
-        }),
-      );
-
-      // updateChart();
-    },
-    [setNodes, setUpdateState],
+  const { onUpdateNodeText } = useCustomNodeFunctions(
+    setNodes,
+    setShouldSyncChartState,
   );
 
   const triggerUpdate = useCallback(
@@ -54,7 +43,7 @@ const useUpdateChart = (
   );
 
   useEffect(() => {
-    if (!updateState) return;
+    if (!shouldSyncChartState) return;
     triggerUpdate(nodes, edges);
     if (chartFetched) {
       updateChart({
@@ -63,13 +52,13 @@ const useUpdateChart = (
       });
     }
     socket.timeout(5000).emit("chart-updated", { nodes, edges });
-    setUpdateState(false);
+    setShouldSyncChartState(false);
   }, [
     nodes,
     edges,
-    updateState,
+    shouldSyncChartState,
     triggerUpdate,
-    setUpdateState,
+    setShouldSyncChartState,
     updateChart,
     chartId,
     getViewport,
@@ -77,12 +66,11 @@ const useUpdateChart = (
   ]);
 
   useEffect(() => {
-    console.log(elements);
     if (!elements) return;
     setNodes(elements.nodes);
     setEdges(elements.edges);
-    setUpdateState(true);
-  }, [elements, setEdges, setNodes, setUpdateState]);
+    setShouldSyncChartState(true);
+  }, [elements, setEdges, setNodes, setShouldSyncChartState]);
 
   useEffect(() => {
     if (!wsConnected) return;
@@ -117,6 +105,4 @@ const useUpdateChart = (
       socket.off("chart-updated", onChartUpdated);
     };
   }, [wsConnected, onUpdateNodeText, setNodes, setEdges]);
-};
-
-export default useUpdateChart;
+}

@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Handle, NodeResizer, Position } from "reactflow";
 
-// const handleStyle = { left: 10 };
-
 function TextUpdaterNode({
   id,
   data,
@@ -35,7 +33,7 @@ function TextUpdaterNode({
   // console.log(size);
 
   return (
-    <div className="border border-black h-full rounded p-3">
+    <div className="h-full rounded border border-black p-3">
       <NodeResizer
         color="#ff0071"
         isVisible={selected}
@@ -48,7 +46,7 @@ function TextUpdaterNode({
         isConnectable={isConnectable}
       />
       <div
-        className="min-w-[100px] min-h-[30px] w-full h-full"
+        className="h-full min-h-[30px] w-full min-w-[100px]"
         onDoubleClick={() => {
           setIsEditing(true);
         }}
@@ -58,7 +56,7 @@ function TextUpdaterNode({
             value={data.label}
             onChange={(e) => onTextChange(e.target.value)}
             onBlur={() => setIsEditing(false)}
-            className="w-full h-full resize-none overflow-hidden nodrag"
+            className="nodrag h-full w-full resize-none overflow-hidden"
             autoFocus
           />
         ) : (

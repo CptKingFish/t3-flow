@@ -2,7 +2,7 @@ import Head from "next/head";
 
 import { useEffect, useState, Fragment } from "react";
 import { socket } from "../lib/socket/socket";
-import FlowChartProvider from "../components/FlowChartProvider";
+import FlowChartProvider from "../components/FlowChartWrapper";
 
 import { api } from "~/@/utils/api";
 import SidebarMenu from "../components/SidebarMenu";

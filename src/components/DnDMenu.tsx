@@ -1,7 +1,7 @@
 import InputNode from "reactflow";
 import Shape from "./nodes/Shapes";
 
-function DnDMenu() {
+export default function DnDMenu() {
   const onDragStart = (
     event: React.DragEvent<HTMLDivElement>,
     nodeType: string,
@@ -11,7 +11,7 @@ function DnDMenu() {
   };
 
   return (
-    <aside className="mt-12">
+    <aside className="mt-12 border border-black p-3">
       <div className="description">
         You can drag these nodes
         <br/> to the pane on the right.
@@ -46,7 +46,7 @@ function DnDMenu() {
           Editable Node
         </div>
         <div
-          className="row"
+          className="row h-24"
           onDragStart={(event) => onDragStart(event, "decisionNode")}
           draggable
         >
@@ -56,9 +56,18 @@ function DnDMenu() {
           </div>
 
         </div>
+        <div
+          className="row h-24"
+          onDragStart={(event) => onDragStart(event, "dataNode")}
+          draggable
+        >
+          <div className="w-full h-full relative">
+            <Shape type="parallelogram" className = "absolute -z-10" width={132} height={88} override={true}/>
+            <div className="absolute z-10 items-center justify-center top-8 left-7">Data node</div>
+          </div>
+
+        </div>
       </div>
     </aside>
   );
 }
-
-export default DnDMenu;

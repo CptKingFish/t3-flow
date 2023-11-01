@@ -4,8 +4,6 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/@/server/api/trpc";
 
-const ReactFlowJson = z.custom<ReactFlowJsonObject>();
-
 export const flowchartRouter = createTRPCRouter({
   getCharts: publicProcedure.query(({ ctx }) => {
     return ctx.db.flowchart.findMany({
@@ -44,7 +42,7 @@ export const flowchartRouter = createTRPCRouter({
       });
     }),
   updateChart: publicProcedure
-    .input(z.object({ id: z.string(), state: ReactFlowJson }))
+    .input(z.object({ id: z.string(), state: z.custom<ReactFlowJsonObject>() }))
     .mutation(({ ctx, input }) => {
       const { id, state } = input;
       return ctx.db.flowchart.update({

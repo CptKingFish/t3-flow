@@ -12,13 +12,13 @@ import {
   type NodeChange,
   type Edge,
   type Connection,
-  type ReactFlowInstance,
   type Node,
   useReactFlow,
   applyEdgeChanges,
   type EdgeChange,
 } from "reactflow";
 import { uuid } from "uuidv4";
+import useCustomNodeFunctions from "./useCustomNodeFunctions";
 
 interface MenuState {
   id: string;
@@ -31,74 +31,56 @@ interface MenuState {
 const useNodeAndEdgeCallbacks = (
   setNodes: (value: SetStateAction<Node[]>) => void,
   setEdges: (value: SetStateAction<Edge[]>) => void,
-  setUpdateState: Dispatch<SetStateAction<boolean>>,
+  setShouldSyncChartState: Dispatch<SetStateAction<boolean>>,
   setMenu: (value: SetStateAction<MenuState | null>) => void,
-  reactFlowInstance: ReactFlowInstance | null,
   reactFlowWrapper: RefObject<HTMLInputElement>,
   flowRef: RefObject<HTMLDivElement>,
 ) => {
+  const reactFlowInstance = useReactFlow();
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      setNodes((nds) => applyNodeChanges(changes, nds));
+
       const targetKeys = ["resizing", "dragging"];
       for (const key of targetKeys) {
         const targetChange = changes.find((change) => key in change);
         if (targetChange && key === "resizing") {
-          setUpdateState(!(targetChange as NodeDimensionChange)[key]);
-
+          setShouldSyncChartState(!(targetChange as NodeDimensionChange)[key]);
         } else if (targetChange && key === "dragging") {
-          setUpdateState(!(targetChange as NodePositionChange)[key]);
-
+          setShouldSyncChartState(!(targetChange as NodePositionChange)[key]);
         }
       }
-      setNodes((nds) => applyNodeChanges(changes, nds));
     },
-    [setNodes, setUpdateState],
+    [setNodes, setShouldSyncChartState],
   );
 
   const onNodesDelete = useCallback(
     (changes: NodeChange[]) => {
-      setUpdateState(true);
       setNodes((nds) => applyNodeChanges(changes, nds));
+      setShouldSyncChartState(true);
     },
-    [setNodes, setUpdateState],
+    [setNodes, setShouldSyncChartState],
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      setUpdateState(true);
       setEdges((nds) => applyEdgeChanges(changes, nds));
+      setShouldSyncChartState(true);
     },
-    [setEdges, setUpdateState],
+    [setEdges, setShouldSyncChartState],
   );
 
   const onConnect = useCallback(
     (params: Connection) => {
-      setUpdateState(true);
-
-      setEdges((eds) => {
-
-        let edges = addEdge({ ...params, type: "step" }, eds)
-        return edges
-      });
+      setEdges((eds) => addEdge({ ...params, type: "step" }, eds));
+      setShouldSyncChartState(true);
     },
-    [setEdges, setUpdateState],
+    [setEdges, setShouldSyncChartState],
   );
 
-  const onUpdateNodeText = useCallback(
-    (nodeId: string, text: string) => {
-      setUpdateState(true);
-      setNodes((nds) =>
-        nds.map((nd: Node) => {
-          if (nd.id === nodeId) {
-            return { ...nd, data: { ...nd.data, label: text } as Node };
-          }
-          return nd;
-        }),
-      );
-
-      // updateChart();
-    },
-    [setNodes, setUpdateState],
+  const { onUpdateNodeText } = useCustomNodeFunctions(
+    setNodes,
+    setShouldSyncChartState,
   );
 
   const onDrop = useCallback(
@@ -125,25 +107,19 @@ const useNodeAndEdgeCallbacks = (
         y: event.clientY - reactFlowBounds.top,
       });
 
-      let newNode: Node
+      let newNode: Node;
       if (type === "editableNode") {
         newNode = {
           id: `dndnode_${uuid()}`,
           type,
           position,
           className: "w-[200px] h-[100px]",
-          width: 150,
-          height: 100,
           data: {
             label: `${type} node`,
             onUpdateNodeText: onUpdateNodeText,
           },
-          style: {
-            width: 150,
-            height: 100,
-          }
-        } as Node;
-      } else if (type === "decisionNode") {
+        };
+      }else if (type === "decisionNode" || type === "dataNode") {
         newNode = {
           id: `dndnode_${uuid()}`,
           type,
@@ -169,17 +145,15 @@ const useNodeAndEdgeCallbacks = (
         };
       }
 
-      setUpdateState(true);
       setNodes((nds) => nds.concat(newNode));
-
-      // updateChart();
+      setShouldSyncChartState(true);
     },
     [
       onUpdateNodeText,
       reactFlowInstance,
       reactFlowWrapper,
       setNodes,
-      setUpdateState,
+      setShouldSyncChartState,
     ],
   );
 
@@ -239,10 +213,10 @@ const useNodeAndEdgeCallbacks = (
       if (!localStorage.getItem(flowKey)) return;
       const flow = JSON.parse(localStorage.getItem(flowKey) ?? "") as
         | {
-          nodes: Node[];
-          edges: Edge[];
-          viewport: { x: number; y: number; zoom: number };
-        }
+            nodes: Node[];
+            edges: Edge[];
+            viewport: { x: number; y: number; zoom: number };
+          }
         | "";
 
       if (flow !== "") {

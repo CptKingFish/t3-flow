@@ -13,7 +13,7 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log(`connect ${socket.id}`);
 
-  socket.on("ping", (cb) => {
+  socket.on("ping", (cb: () => void) => {
     console.log("ping");
     cb();
   });
