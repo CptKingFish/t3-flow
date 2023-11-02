@@ -149,7 +149,7 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
           onNodeContextMenu={onNodeContextMenu}
           fitView
         >
-          <TopMenu />
+          
           <MiniMap />
           {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
           <Background />
@@ -158,22 +158,24 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
       </div>
       <Panel position="top-center">
         <span className="font-semibold">{chartTitle}</span>
+        {/* <TopMenu currentChartId={chartId} refetch={refetchChart}/> */}
       </Panel>
       <Panel position="top-right">
-        <button className="pr-3" onClick={onSave}>
+        <button className="pr-3 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded" onClick={onSave}>
           save
         </button>
-        <button onClick={onRestore}>restore</button>
+        <button onClick={onRestore} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded">restore</button>
         <div className="fixed right-16 top-16 flex flex-row">
-          <button onClick={() => undo()} className="j-button app gray mh-0-5r">
+          <button onClick={() => undo()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded">
             Undo
           </button>
-          <button onClick={() => redo()} className="j-button app gray mh-0-5r">
+          <button onClick={() => redo()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded">
             Redo
           </button>
-          <button onClick={() => reset()} className="j-button app gray mh-0-5r">
+          <button onClick={() => reset()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded">
             Reset
           </button>
+          
         </div>
         <DownloadButton />
       </Panel>

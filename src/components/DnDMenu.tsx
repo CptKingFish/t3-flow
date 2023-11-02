@@ -17,34 +17,34 @@ export default function DnDMenu() {
         <br/> to the pane on the right.
       </div>
       <div className="grid">
-        <div
+        {/* <div
           className="row"
           onDragStart={(event) => onDragStart(event, "input")}
           draggable
         >
           Input Node
-        </div>
-        <div
+        </div> */}
+        {/* <div
           className="row"
           onDragStart={(event) => onDragStart(event, "default")}
           draggable
         >
           Default Node
-        </div>
-        <div
+        </div> */}
+        {/* <div
           className="row"
           onDragStart={(event) => onDragStart(event, "output")}
           draggable
         >
           Output Node
-        </div>
-        <div
+        </div> */}
+        {/* <div
           className="row"
           onDragStart={(event) => onDragStart(event, "editableNode")}
           draggable
         >
           Editable Node
-        </div>
+        </div> */}
         <div
           className="row h-28"
           onDragStart={(event) => onDragStart(event, "decisionNode")}

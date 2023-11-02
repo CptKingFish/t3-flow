@@ -3,6 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { api } from "~/@/utils/api";
 import { useRouter } from "next/router";
+import { socket } from "../lib/socket/socket";
 
 interface DeleteChartModalProps {
   deleteModal: boolean;
@@ -29,6 +30,7 @@ export default function DeleteChartModal({
       const url = window.location.pathname.split("/")[2];
       if (chartId === url) {
         void router.push(`/`);
+        socket.timeout(5000).emit("leave-room", chartId)
       } else {
         refetch();
         setDeleteModal(false);

@@ -51,7 +51,7 @@ export default function useUpdateChartListeners(
         state: { nodes, edges, viewport: getViewport() },
       });
     }
-    socket.timeout(5000).emit("chart-updated", { nodes, edges });
+    socket.timeout(5000).emit("chart-updated", { room:chartId,nodes, edges });
     setShouldSyncChartState(false);
   }, [
     nodes,
@@ -76,12 +76,18 @@ export default function useUpdateChartListeners(
     if (!wsConnected) return;
 
     function onChartUpdated({
+      room: updatedChartId,
       nodes: updatedNodes,
       edges: updatedEdges,
     }: {
+      room: string;
       nodes: Node[];
       edges: Edge[];
     }) {
+      if (updatedChartId !== chartId) {
+        console.log("chartId", chartId, "updatedChartId", updatedChartId)
+        return;
+      }
       const nodesWithTextUpdate = updatedNodes.map((node) => {
         if (node.type === "editableNode") {
           return {

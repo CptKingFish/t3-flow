@@ -1,4 +1,4 @@
-const styles = { fill: "#aaa",strokeWidth: 2, stroke: '#fff' };
+const styles = { fill: "#aaa" };
 
 export default function Shape({type, width, height,className,override }:{ type:string,width: number, height: number,className:string,override?:boolean }) {
 

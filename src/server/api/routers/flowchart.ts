@@ -60,4 +60,46 @@ export const flowchartRouter = createTRPCRouter({
         where: { id },
       });
     }),
+
+  //create a flowchart snapshot based on the prisma schema
+  createSnapshot: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input;
+      const flowchart = await ctx.db.flowchart.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          title: true,
+          state: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      if (!flowchart) {
+        throw new Error("Flowchart not found");
+      }
+      const snapshot = await ctx.db.flowchartSnapshots.create({
+        data: {
+          flowchartId: flowchart.id,
+          state: flowchart.state  as unknown as JsonObject,
+        },
+      });
+      return snapshot;
+    }),
+    getSnapshots: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { id } = input;
+      const snapshots = await ctx.db.flowchartSnapshots.findMany({
+        where: { flowchartId: id },
+        select: {
+          id: true,
+          flowchartId: true,
+          state: true,
+          createdAt: true,
+        },
+      });
+      return snapshots;
+    }),
 });

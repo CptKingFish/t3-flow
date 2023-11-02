@@ -48,7 +48,7 @@ function DecisionNode({
     }, [isEditing])
 
     return (
-        <div className="h-full rounded">
+        <div className="h-full rounded bg-none">
             <NodeResizer
                 color="#ff0071"
                 isVisible={selected}

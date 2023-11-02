@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import axios from "axios";
 
 const app = express();
 const httpServer = createServer(app);
@@ -16,6 +17,7 @@ io.on("connection", (socket) => {
   socket.on("join-room", async (room: string) => {
     try {
       await socket.join(room);
+      updateRoomUserCount(room);
       console.log(`Socket ${socket.id} joined room ${JSON.stringify(room)}`);
     } catch (error) {
       console.error(`Error joining room: ${error}`);
@@ -26,6 +28,7 @@ io.on("connection", (socket) => {
   socket.on("leave-room", async (room: string) => {
     try {
       await socket.leave(room);
+      updateRoomUserCount(room, true);
       console.log(`Socket ${socket.id} left room ${room}`);
     } catch (error) {
       console.error(`Error leaving room: ${error}`);
@@ -48,7 +51,7 @@ io.on("connection", (socket) => {
         console.log("room", room);
 
         // Broadcast to all other clients in the same room except sender
-        socket.to(room).emit("chart-updated", { nodes, edges });
+        socket.to(room).emit("chart-updated", { room, nodes, edges });
         console.log(`chart-updated from ${socket.id} in room ${room}`);
         // console.log(`nodes: ${JSON.stringify(nodes)}`);
       } catch (error) {
@@ -58,8 +61,20 @@ io.on("connection", (socket) => {
     },
   );
 
+  function updateRoomUserCount(room: string, isLeaving: boolean = false): void {
+    const roomCount: number = io.sockets.adapter.rooms.get(room)?.size || 0;
+    console.log("room id", room)
+    if (isLeaving) {
+      // Emit to the specific user who is leaving
+      socket.emit('user-count', roomCount - 1);
+    } else {
+      // Emit to all in the room
+      io.to(room).emit('user-count', roomCount);
+    }
+  }
+
   socket.on("disconnect", () => {
-    // Handle disconnection if needed, like informing other sockets in the room
+
     console.log(`disconnect ${socket.id}`);
   });
 
@@ -87,6 +102,8 @@ io.on("connection", (socket) => {
   //   socket.broadcast.emit("chart-updated", { nodes, edges });
   // });
 });
+
+
 
 httpServer.listen(3001);
 console.log("server started");

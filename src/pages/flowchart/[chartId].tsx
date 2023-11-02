@@ -4,6 +4,7 @@ import FlowChartProvider from "../../components/FlowChartWrapper";
 
 import SidebarMenu from "../../components/SidebarMenu";
 import { type GetServerSidePropsContext } from "next";
+import { api } from "~/@/utils/api";
 
 interface FlowChartEditorProps {
   chartId: string;
@@ -13,18 +14,31 @@ export default function FlowChartEditor({ chartId }: FlowChartEditorProps) {
   const [openSidebar, setOpenSidebar] = useState(false);
   const [openDeleteChartModal, setOpenDeleteChartModal] = useState(false);
   const [wsConnected, setWsConnected] = useState(socket.connected);
+  const [userNumber, setUserNumber] = useState(0);
+  const {mutate:createSnapshot} = api.flowchart.createSnapshot.useMutation()
 
   useEffect(() => {
     function onConnect() {
       setWsConnected(true);
       console.log("connected to websocket");
+      if (!chartId) return;
+      socket.timeout(5000).emit("join-room", chartId)
+      
     }
 
     function onDisconnect() {
       setWsConnected(false);
+      if (!chartId) return;
+
+      socket.timeout(5000).emit("leave-room", chartId)
     }
 
+    socket.on("user-count",(count:number)=>{
+      setUserNumber(count)
+    })
+
     socket.on("connect", onConnect);
+    
     socket.on("disconnect", onDisconnect);
     socket.onAny((event, ...args) => {
       console.log(event, args);
