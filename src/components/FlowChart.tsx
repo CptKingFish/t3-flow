@@ -158,7 +158,8 @@ function FlowChart({ wsConnected, chartId }: FlowChartProps) {
       </div>
       <Panel position="top-center">
         <span className="font-semibold">{chartTitle}</span>
-        {/* <TopMenu currentChartId={chartId} refetch={refetchChart}/> */}
+        <br/>
+        <TopMenu currentChartId={chartId} />
       </Panel>
       <Panel position="top-right">
         <button className="pr-3 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded" onClick={onSave}>

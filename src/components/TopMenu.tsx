@@ -18,7 +18,7 @@ import SnapshotModal from './SnapshotModal';
 
 
 
-function TopMenu({currentChartId,refetch}: {currentChartId:string,refetch:()=>void}) {
+function TopMenu({currentChartId}: {currentChartId:string}) {
   const nodes = useNodes();
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
@@ -68,7 +68,7 @@ function TopMenu({currentChartId,refetch}: {currentChartId:string,refetch:()=>vo
         snapshotModal={snapshotModal}
         setSnapshotModal={setSnapshotModal}
         chartId={currentChartId}
-        refetch={refetch}
+
 
       />
       <Disclosure as="nav" className="bg-white shadow z-50">

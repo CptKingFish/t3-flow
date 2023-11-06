@@ -1,7 +1,8 @@
 import { type JsonObject } from "@prisma/client/runtime/library";
 import { type ReactFlowJsonObject } from "reactflow";
 import { z } from "zod";
-
+import uploadToS3 from "~/@/utils/uploadToS3";
+import deleteFromS3 from "~/@/utils/deleteFromS3";
 import { createTRPCRouter, publicProcedure } from "~/@/server/api/trpc";
 
 export const flowchartRouter = createTRPCRouter({
@@ -61,33 +62,58 @@ export const flowchartRouter = createTRPCRouter({
       });
     }),
 
-  //create a flowchart snapshot based on the prisma schema
+  //create a flowchart snapshot based on the prisma schema, taking in the flowchart id and an image of the flowchart, uploading to s3
   createSnapshot: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), image: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { id } = input;
-      const flowchart = await ctx.db.flowchart.findUnique({
+      const { id, image } = input;
+      const flowchart = await ctx.db.flowchart.findFirst({
         where: { id },
-        select: {
-          id: true,
-          title: true,
-          state: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
       if (!flowchart) {
         throw new Error("Flowchart not found");
       }
-      const snapshot = await ctx.db.flowchartSnapshots.create({
+      const { title, state } = flowchart;
+      const { Location: imageUrl } = await uploadToS3(
+        process.env.AWS_BUCKET_NAME || "",
+        `${id}-${Date.now()}.png`,
+        Buffer.from(image.replace(/^data:image\/\w+;base64,/, ""), "base64"),
+        "image/png"
+      );
+      return ctx.db.flowchartSnapshots.create({
         data: {
-          flowchartId: flowchart.id,
-          state: flowchart.state  as unknown as JsonObject,
+          flowchartId: id,
+          state: state as unknown as JsonObject,
+          imageUrl: imageUrl,
         },
       });
-      return snapshot;
     }),
-    getSnapshots: publicProcedure
+
+  //delete snapshot and image from s3 bucket
+  deleteSnapshot: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input;
+      const snapshot = await ctx.db.flowchartSnapshots.findFirst({
+        where: { id },
+      });
+      if (!snapshot) {
+        throw new Error("Snapshot not found");
+      }
+      const { imageUrl } = snapshot;
+      if (imageUrl) {
+        const key = imageUrl.split('/').pop();
+        await deleteFromS3(process.env.AWS_BUCKET_NAME || "", key || "");
+
+      }
+
+      return ctx.db.flowchartSnapshots.delete({
+        where: { id },
+      });
+    }),
+
+
+  getSnapshots: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const { id } = input;
@@ -95,11 +121,32 @@ export const flowchartRouter = createTRPCRouter({
         where: { flowchartId: id },
         select: {
           id: true,
+          imageUrl: true,
           flowchartId: true,
           state: true,
           createdAt: true,
         },
       });
       return snapshots;
+    }),
+
+  restoreSnapshot: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input;
+      const snapshot = await ctx.db.flowchartSnapshots.findFirst({
+        where: { id },
+      });
+      if (!snapshot) {
+        throw new Error("Snapshot not found");
+      }
+      const { flowchartId, state } = snapshot;
+      await ctx.db.flowchart.update({
+        where: { id: flowchartId },
+        data: {
+          state: state as unknown as JsonObject,
+        },
+      });
+      return snapshot;
     }),
 });

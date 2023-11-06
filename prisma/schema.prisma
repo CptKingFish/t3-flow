@@ -25,6 +25,7 @@ model FlowchartSnapshots{
     id        String   @id @default(cuid())
     flowchart Flowchart @relation(fields:[flowchartId],references: [id])
     flowchartId String
+    imageUrl  String?
     state     Json?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
